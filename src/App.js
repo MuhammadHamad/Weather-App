@@ -1,56 +1,111 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, { useEffect, useState, useRef } from "react";
+// import { Counter } from "./features/counter/Counter";
+import "./App.css";
+import axios from "axios";
+import moment from "moment";
 
 function App() {
+  const [weatherInfo, setWeatherInfo] = useState("");
+  const [magicNumbers, setMagicNumbers] = useState([1, 4, 6, 80, 44, 23]);
+  const [totalOfMagicNumbers, setTotalOfMagicNumbers] = useState(0);
+  const [image, setImage] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    fetchWeatherInfo();
+  }, []);
+
+  // When magic numbers change, recalculate....
+  // useEffect(() => {
+  //   const totalOfMagicNumbers = magicNumbers.reduce(
+  //     (total, magicNumber) => total + magicNumber,
+  //     0
+  //   );
+
+  //   setTotalOfMagicNumbers(totalOfMagicNumbers);
+  // }, []);
+
+  const fetchWeatherInfo = (e) => {
+    e?.preventDefault();
+
+    const options = {
+      method: "GET",
+      url: "https://community-open-weather-map.p.rapidapi.com/weather",
+      params: {
+        q: inputRef.current.value || "London, uk",
+        units: "metric",
+      },
+      headers: {
+        "x-rapidapi-key": "a2f175b37cmsh88c4a643f920789p18f72cjsna947c968a6c0",
+        "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
+      },
+    };
+
+    axios
+      .request(options)
+      .then((response) => {
+        console.log(response.data);
+        setWeatherInfo(response.data);
+
+        //Clear the input after data fetch
+        inputRef.current.value = "";
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  useEffect(() => {
+    determineBackgroundImage();
+  }, [weatherInfo]);
+
+  const determineBackgroundImage = () => {
+    if (weatherInfo?.main?.temp > 10) {
+      setImage(
+        "https://images.unsplash.com/photo-1601134467661-3d775b999c8b?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTd8fHdlYXRoZXJ8ZW58MHx8MHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
+      );
+      if (weatherInfo?.main?.temp < 10) {
+        setImage(
+          "https://images.unsplash.com/photo-1422207134147-65fb81f59e38?ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y29sZHxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
+        );
+      }
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
+    <div className="app" style={{ backgroundImage: `url(${image})` }}>
+      <div className="app__container">
+        <div className="app__info app__left">
+          <h1 className="app__header">Weather App</h1>
+
+          {/* <h2>Your magic numbers: {magicNumbers.join(", ")}</h2>
+          <br />
+          <h3>The total of magic numbers: {totalOfMagicNumbers}</h3>
+          <br /> */}
+
+          <form>
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Type the city name"
+            />
+            <button type="submit" onClick={fetchWeatherInfo}>
+              Show me the weather
+            </button>
+          </form>
+        </div>
+
+        <div className="app__info app__right">
+          <h2>{weatherInfo.name}</h2>
+          <h2>{weatherInfo.main?.temp} Degrees Celsius</h2>
+          <h3>
+            {weatherInfo &&
+              `Sunrise: ${moment
+                .unix(weatherInfo.sys?.sunrise)
+                .format("LLLL")}`}
+          </h3>
+        </div>
+      </div>
     </div>
   );
 }
