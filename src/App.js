@@ -6,24 +6,12 @@ import moment from "moment";
 
 function App() {
   const [weatherInfo, setWeatherInfo] = useState("");
-  const [magicNumbers, setMagicNumbers] = useState([1, 4, 6, 80, 44, 23]);
-  const [totalOfMagicNumbers, setTotalOfMagicNumbers] = useState(0);
   const [image, setImage] = useState("");
   const inputRef = useRef(null);
 
   useEffect(() => {
     fetchWeatherInfo();
   }, []);
-
-  // When magic numbers change, recalculate....
-  // useEffect(() => {
-  //   const totalOfMagicNumbers = magicNumbers.reduce(
-  //     (total, magicNumber) => total + magicNumber,
-  //     0
-  //   );
-
-  //   setTotalOfMagicNumbers(totalOfMagicNumbers);
-  // }, []);
 
   const fetchWeatherInfo = (e) => {
     e?.preventDefault();
@@ -77,12 +65,6 @@ function App() {
       <div className="app__container">
         <div className="app__info app__left">
           <h1 className="app__header">Weather App</h1>
-
-          {/* <h2>Your magic numbers: {magicNumbers.join(", ")}</h2>
-          <br />
-          <h3>The total of magic numbers: {totalOfMagicNumbers}</h3>
-          <br /> */}
-
           <form>
             <input
               ref={inputRef}
